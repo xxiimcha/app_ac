@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
+import 'loading_screen.dart';
 import 'consumer_registration_page.dart';
 import 'supplier_registration_page.dart';
 import 'user_type_selection_page.dart';
@@ -11,8 +12,14 @@ import 'consumer/settings.dart';
 
 void main() {
   runApp(MaterialApp(
-    initialRoute: '/',
+    title: 'Your App Name',
+    theme: ThemeData(
+      primarySwatch: Colors.blue,
+      visualDensity: VisualDensity.adaptivePlatformDensity,
+    ),
+    initialRoute: '/splash',
     routes: {
+      '/splash': (context) => SplashScreen(),
       '/': (context) => LoginPage(),
       '/user_type': (context) => UserTypeSelectionPage(),
       '/register_consumer': (context) => ConsumerRegistrationPage(),
@@ -25,3 +32,4 @@ void main() {
     },
   ));
 }
+
