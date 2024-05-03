@@ -6,21 +6,25 @@ class ConsumerHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConsumerLayout(
-      username: 'John Doe', // Example username, pass the actual user data here
-      child: OpenStreetMapSearchAndPick(
-        buttonTextStyle: const TextStyle(fontSize: 18, fontStyle: FontStyle.normal),
-        buttonColor: Colors.blue,
-        buttonText: 'Set Current Location',
-        onPicked: (pickedData) {
-          try {
-            print("Latitude: ${pickedData.latLong.latitude}");
-            print("Longitude: ${pickedData.latLong.longitude}");
-            print("Address: ${pickedData.address}");
-            print("Address Name: ${pickedData.addressName}");
-          } catch (e) {
-            print("Error processing picked data: $e");
-          }
-        },
+      username: 'John Doe',
+      child: Scaffold(
+        body: Center(
+          child: OpenStreetMapSearchAndPick(
+            buttonTextStyle: const TextStyle(fontSize: 18, fontStyle: FontStyle.normal),
+            buttonColor: Colors.blue,
+            buttonText: 'Set Current Location',
+            onPicked: (pickedData) {
+              try {
+                print("Latitude: ${pickedData.latLong.latitude}");
+                print("Longitude: ${pickedData.latLong.longitude}");
+                print("Address: ${pickedData.address}");
+                print("Address Name: ${pickedData.addressName}");
+              } catch (e) {
+                print("Error processing picked data: $e");
+              }
+            },
+          ),
+        ),
       ),
     );
   }
