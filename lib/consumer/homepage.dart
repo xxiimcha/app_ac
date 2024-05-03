@@ -12,7 +12,6 @@ class ConsumerHomePage extends StatelessWidget {
           child: OpenStreetMapSearchAndPick(
             buttonTextStyle: const TextStyle(fontSize: 18, fontStyle: FontStyle.normal),
             buttonColor: Colors.blue,
-            buttonText: 'Set Current Location',
             onPicked: (pickedData) {
               try {
                 print("Latitude: ${pickedData.latLong.latitude}");
