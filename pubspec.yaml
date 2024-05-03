@@ -10,10 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  image_picker: ^0.8.4+4
+  image_picker: ^1.1.1
   mysql1: ^0.20.0
   sqflite: ^2.0.0+3
   cupertino_icons: ^1.0.6
+  open_street_map_search_and_pick: ^0.1.1
 
 dev_dependencies:
   flutter_test:
