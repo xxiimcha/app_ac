@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:provider/provider.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart'; // Import EasyLoading
 import 'connection/database_helper.dart';
 import 'consumer/homepage.dart';
 import 'supplier/homepage.dart'; // Ensure you have a SupplierHomePage
@@ -57,6 +57,7 @@ class LoginPage extends StatelessWidget {
                 onPressed: () async {
                   MySqlConnection? connection;
                   try {
+                    EasyLoading.show(status: 'Logging in...'); // Show loading indicator
                     connection = await DatabaseHelper.getConnection();
                     var result = await connection.query(
                         'SELECT * FROM users WHERE username = ? AND password = ?',
@@ -69,41 +70,61 @@ class LoginPage extends StatelessWidget {
                       // Save the user session
                       Provider.of<UserProvider>(context, listen: false).setUser(user);
 
+                      EasyLoading.dismiss(); // Dismiss loading indicator
+
                       if (user.userType == 1) {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(builder: (context) => ConsumerHomePage()),
                         );
                       } else if (user.userType == 2) {
-                        var approvalResult = await connection.query(
-                          'SELECT is_approved FROM suppliers WHERE user_id = ?',
-                          [user.id],
-                        );
-
-                        var isApproved = approvalResult.first['is_approved'];
-
-                        if (isApproved == 1) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => SupplierHomePage()),
+                        // Check if supplier_id exists
+                        if (userRow.fields['supplier_id'] != null) {
+                          var supplierId = userRow.fields['supplier_id'];
+                          var approvalResult = await connection.query(
+                            'SELECT is_approved FROM suppliers WHERE sid = ?',
+                            [supplierId],
                           );
+
+                          if (approvalResult.isNotEmpty) {
+                            var isApproved = approvalResult.first['is_approved'];
+
+                            if (isApproved == 1) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => SupplierHomePage()),
+                              );
+                            } else {
+                              EasyLoading.showToast(
+                                "Your account is pending approval.",
+                                toastPosition: EasyLoadingToastPosition.bottom,
+                                duration: Duration(seconds: 3),
+                              );
+                            }
+                          } else {
+                            EasyLoading.showToast(
+                              "Supplier data not found.",
+                              toastPosition: EasyLoadingToastPosition.bottom,
+                              duration: Duration(seconds: 3),
+                            );
+                          }
                         } else {
-                          Fluttertoast.showToast(
-                            msg: "Your account is pending approval.",
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIosWeb: 1,
-                            backgroundColor: Colors.red,
-                            textColor: Colors.white,
-                            fontSize: 16.0,
+                          EasyLoading.showToast(
+                            "Supplier ID not found for this user.",
+                            toastPosition: EasyLoadingToastPosition.bottom,
+                            duration: Duration(seconds: 3),
                           );
                         }
                       }
                     } else {
-                      print('Invalid username or password');
+                      EasyLoading.showToast(
+                        "Invalid username or password.",
+                        toastPosition: EasyLoadingToastPosition.bottom,
+                        duration: Duration(seconds: 3),
+                      );
                     }
                   } catch (e) {
-                    print('Error: $e');
+                    EasyLoading.showError('Error: $e');
                   } finally {
                     if (connection != null) {
                       await connection.close();

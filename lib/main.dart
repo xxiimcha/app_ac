@@ -11,8 +11,10 @@ import 'consumer/favorites.dart';
 import 'consumer/messages.dart';
 import 'consumer/settings.dart';
 import 'provider/user_provider.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure that plugin services are initialized
   runApp(
     ChangeNotifierProvider(
       create: (context) => UserProvider(),
@@ -25,6 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: EasyLoading.init(), // Initialize EasyLoading
       title: 'Your App Name',
       theme: ThemeData(
         primarySwatch: Colors.blue,
