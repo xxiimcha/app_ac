@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mysql1/mysql1.dart';
 import 'connection/database_helper.dart';
+import 'utils/custom_styles.dart'; // Import the custom styles
 
 class SupplierRegistrationPage extends StatefulWidget {
   @override
@@ -11,37 +12,33 @@ class SupplierRegistrationPage extends StatefulWidget {
 
 class _SupplierRegistrationPageState extends State<SupplierRegistrationPage> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController _firstNameController = TextEditingController();
-  TextEditingController _middleNameController = TextEditingController();
-  TextEditingController _lastNameController = TextEditingController();
-  TextEditingController _stationController = TextEditingController();
-  TextEditingController _addressController = TextEditingController();
-  TextEditingController _contactController = TextEditingController();
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _confirmController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _middleNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _stationController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _contactController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmController = TextEditingController();
 
   String? _selectedBarangay;
   final List<String> _barangayList = ['Barangay 1', 'Barangay 2', 'Barangay 3', 'Barangay 4'];
-  
+
   final _imagePicker = ImagePicker();
-  XFile? _imageFile;
+  XFile? _validIdImageFile;
+  XFile? _businessPermitImageFile;
 
-  Future<void> _selectBusinessPermitImage() async {
+  Future<void> _selectImage(bool isValidId) async {
     final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _imageFile = pickedFile;
-      });
-    }
-  }
-
-  Future<void> _selectImage() async {
-    final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = pickedFile;
+        if (isValidId) {
+          _validIdImageFile = pickedFile;
+        } else {
+          _businessPermitImageFile = pickedFile;
+        }
       });
     }
   }
@@ -52,12 +49,12 @@ class _SupplierRegistrationPageState extends State<SupplierRegistrationPage> {
       connection = await DatabaseHelper.getConnection();
       await connection.transaction((transaction) async {
         // Save Valid ID image
-        String validIdPath = 'lib/ids/${DateTime.now().millisecondsSinceEpoch}.jpg'; // Define path
-        await _imageFile?.saveTo(validIdPath); // Save image
-        
+        String validIdPath = 'lib/ids/${DateTime.now().millisecondsSinceEpoch}_valid_id.jpg'; // Define path
+        await _validIdImageFile?.saveTo(validIdPath); // Save image
+
         // Save Business Permit image
-        String businessPermitPath = 'lib/permits/${DateTime.now().millisecondsSinceEpoch}.jpg'; // Define path
-        await _imageFile?.saveTo(businessPermitPath); // Save image
+        String businessPermitPath = 'lib/permits/${DateTime.now().millisecondsSinceEpoch}_business_permit.jpg'; // Define path
+        await _businessPermitImageFile?.saveTo(businessPermitPath); // Save image
 
         // Insert supplier data into database
         Results result = await transaction.query('''
@@ -77,9 +74,9 @@ class _SupplierRegistrationPageState extends State<SupplierRegistrationPage> {
           _emailController.text,
           _passwordController.text,
         ]);
-        
+
         int supplierId = result.insertId!;
-        
+
         // Insert into users table
         await transaction.query('''
           INSERT INTO users (name, username, password, user_type, supplier_id)
@@ -106,7 +103,10 @@ class _SupplierRegistrationPageState extends State<SupplierRegistrationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Supplier Registration')),
+      appBar: AppBar(
+        title: Text('Supplier Registration'),
+        backgroundColor: Colors.blue, // Set AppBar color to blue
+      ),
       body: Center(
         child: SingleChildScrollView( // Allows for scrolling when needed
           child: Padding(
@@ -118,7 +118,7 @@ class _SupplierRegistrationPageState extends State<SupplierRegistrationPage> {
                 children: <Widget>[
                   TextFormField(
                     controller: _firstNameController,
-                    decoration: InputDecoration(labelText: 'First Name'),
+                    decoration: CustomStyles.textBoxDecoration('First Name'),
                     validator: (String? value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your first name';
@@ -126,35 +126,41 @@ class _SupplierRegistrationPageState extends State<SupplierRegistrationPage> {
                       return null;
                     },
                   ),
+                  SizedBox(height: 10),
                   TextFormField(
                     controller: _middleNameController,
-                    decoration: InputDecoration(labelText: 'MIddle Name'),
+                    decoration: CustomStyles.textBoxDecoration('Middle Name'),
                   ),
+                  SizedBox(height: 10),
                   TextFormField(
                     controller: _lastNameController,
-                    decoration: InputDecoration(labelText: 'Last Name'),
+                    decoration: CustomStyles.textBoxDecoration('Last Name'),
                     validator: (String? value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your first name';
+                        return 'Please enter your last name';
                       }
                       return null;
                     },
                   ),
+                  SizedBox(height: 10),
                   TextFormField(
                     controller: _stationController,
-                    decoration: InputDecoration(labelText: 'Water Station Name'),
+                    decoration: CustomStyles.textBoxDecoration('Water Station Name'),
                   ),
+                  SizedBox(height: 10),
                   TextFormField(
                     controller: _addressController,
-                    decoration: InputDecoration(labelText: 'Address'),
+                    decoration: CustomStyles.textBoxDecoration('Address'),
                   ),
+                  SizedBox(height: 10),
                   TextFormField(
                     controller: _contactController,
-                    decoration: InputDecoration(labelText: 'Contact Number'),
+                    decoration: CustomStyles.textBoxDecoration('Contact Number'),
                   ),
+                  SizedBox(height: 10),
                   DropdownButtonFormField<String>(
                     value: _selectedBarangay,
-                    decoration: InputDecoration(labelText: 'Barangay'),
+                    decoration: CustomStyles.textBoxDecoration('Barangay'),
                     items: _barangayList.map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
@@ -173,10 +179,11 @@ class _SupplierRegistrationPageState extends State<SupplierRegistrationPage> {
                       return null;
                     },
                   ),
+                  SizedBox(height: 20),
                   Column(
                     children: [
                       GestureDetector(
-                        onTap: _selectImage,
+                        onTap: () => _selectImage(true),
                         child: Column(
                           children: [
                             Text(
@@ -185,7 +192,10 @@ class _SupplierRegistrationPageState extends State<SupplierRegistrationPage> {
                             ),
                             SizedBox(height: 10),
                             ElevatedButton(
-                              onPressed: _selectImage,
+                              style: CustomStyles.buttonStyle().copyWith(
+                                minimumSize: MaterialStateProperty.all(Size(200, 50)),
+                              ),
+                              onPressed: () => _selectImage(true),
                               child: Text('Upload Photo'),
                             ),
                           ],
@@ -193,7 +203,7 @@ class _SupplierRegistrationPageState extends State<SupplierRegistrationPage> {
                       ),
                       SizedBox(height: 20), // Add some spacing between the two image pickers
                       GestureDetector(
-                        onTap: _selectBusinessPermitImage, // Add a function for selecting business permit image
+                        onTap: () => _selectImage(false),
                         child: Column(
                           children: [
                             Text(
@@ -202,7 +212,10 @@ class _SupplierRegistrationPageState extends State<SupplierRegistrationPage> {
                             ),
                             SizedBox(height: 10),
                             ElevatedButton(
-                              onPressed: _selectBusinessPermitImage, // Add a function for selecting business permit image
+                              style: CustomStyles.buttonStyle().copyWith(
+                                minimumSize: MaterialStateProperty.all(Size(200, 50)),
+                              ),
+                              onPressed: () => _selectImage(false),
                               child: Text('Upload Photo'),
                             ),
                           ],
@@ -210,24 +223,31 @@ class _SupplierRegistrationPageState extends State<SupplierRegistrationPage> {
                       ),
                     ],
                   ),
+                  SizedBox(height: 20),
                   TextFormField(
                     controller: _usernameController,
-                    decoration: InputDecoration(labelText: 'Username'),
+                    decoration: CustomStyles.textBoxDecoration('Username'),
                   ),
+                  SizedBox(height: 10),
                   TextFormField(
                     controller: _emailController,
-                    decoration: InputDecoration(labelText: 'Email'),
+                    decoration: CustomStyles.textBoxDecoration('Email'),
                   ),
+                  SizedBox(height: 10),
                   TextFormField(
                     controller: _passwordController,
-                    decoration: InputDecoration(labelText: 'Password'),
+                    decoration: CustomStyles.textBoxDecoration('Password'),
+                    obscureText: true,
                   ),
+                  SizedBox(height: 10),
                   TextFormField(
                     controller: _confirmController,
-                    decoration: InputDecoration(labelText: 'Confirm Password'),
+                    decoration: CustomStyles.textBoxDecoration('Confirm Password'),
+                    obscureText: true,
                   ),
                   SizedBox(height: 20),
                   ElevatedButton(
+                    style: CustomStyles.buttonStyle(),
                     child: Text('Register'),
                     onPressed: () async {
                       if (_formKey.currentState?.validate() ?? false) {

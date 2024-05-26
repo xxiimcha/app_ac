@@ -5,7 +5,7 @@ class DatabaseHelper {
   static final int _port = 3306; // MySQL default port
   static final String _databaseName = 'u646358860_aquac';
   static final String _user = 'u646358860_aquac';
-  static final String _password = '8k!9e36f:Vz]';
+  static final String _password = '7Ul7I552Pq=';
 
   static Future<MySqlConnection> getConnection() async {
     var settings = new ConnectionSettings(
